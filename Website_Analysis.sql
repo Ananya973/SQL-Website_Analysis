@@ -1,0 +1,1245 @@
+SELECT * FROM april_data;
+
+SELECT COUNT(VisitorID) FROM april_data; -- 913
+SELECT COUNT(DISTINCT VisitorID) FROM april_data; -- 722
+
+
+-- DAILY UNIQUE VISITORS ON EACH PAGE
+WITH Pagesvisited AS(
+SELECT 'Home' AS PAGES, DATE(VisitDate) AS DATE, COUNT(DISTINCT VisitorID) AS NUMBER_OF_VISITORS
+FROM april_data
+WHERE VisitedPages LIKE '%Home%' AND DATE(VisitDate)<='2023-04-14'
+GROUP BY DATE(VisitDate)
+UNION ALL 
+SELECT 'Register Button' AS PAGES, DATE(VisitDate) AS DATE, COUNT(DISTINCT VisitorID) AS NUMBER_OF_VISITORS
+FROM april_data
+WHERE VisitedPages LIKE '%Register Button%' AND DATE(VisitDate)<='2023-04-14'
+GROUP BY DATE(VisitDate)
+UNION ALL 
+SELECT 'Payment Page' AS PAGES, DATE(VisitDate) AS DATE, COUNT(DISTINCT VisitorID) AS NUMBER_OF_VISITORS
+FROM april_data
+WHERE VisitedPages LIKE '%Payment Page%' AND DATE(VisitDate)<='2023-04-14'
+GROUP BY DATE(VisitDate)
+UNION ALL 
+SELECT 'Payment Success' AS PAGES, DATE(VisitDate) AS DATE, COUNT(DISTINCT VisitorID) AS NUMBER_OF_VISITORS
+FROM april_data
+WHERE VisitedPages LIKE '%Payment Success%' AND DATE(VisitDate)<='2023-04-14'
+GROUP BY DATE(VisitDate))
+SELECT
+    pages,
+    SUM(CASE WHEN date = '2023-04-01' THEN number_of_visitors ELSE 0 END) AS "2023-04-01",
+    SUM(CASE WHEN date = '2023-04-02' THEN number_of_visitors ELSE 0 END) AS "2023-04-02",
+    SUM(CASE WHEN date = '2023-04-03' THEN number_of_visitors ELSE 0 END) AS "2023-04-03",
+    SUM(CASE WHEN date = '2023-04-04' THEN number_of_visitors ELSE 0 END) AS "2023-04-04",
+    SUM(CASE WHEN date = '2023-04-05' THEN number_of_visitors ELSE 0 END) AS "2023-04-05",
+    SUM(CASE WHEN date = '2023-04-06' THEN number_of_visitors ELSE 0 END) AS "2023-04-06",
+    SUM(CASE WHEN date = '2023-04-07' THEN number_of_visitors ELSE 0 END) AS "2023-04-07",
+    SUM(CASE WHEN date = '2023-04-08' THEN number_of_visitors ELSE 0 END) AS "2023-04-08",
+    SUM(CASE WHEN date = '2023-04-09' THEN number_of_visitors ELSE 0 END) AS "2023-04-09",
+    SUM(CASE WHEN date = '2023-04-10' THEN number_of_visitors ELSE 0 END) AS "2023-04-10",
+    SUM(CASE WHEN date = '2023-04-11' THEN number_of_visitors ELSE 0 END) AS "2023-04-11",
+    SUM(CASE WHEN date = '2023-04-12' THEN number_of_visitors ELSE 0 END) AS "2023-04-12",
+    SUM(CASE WHEN date = '2023-04-13' THEN number_of_visitors ELSE 0 END) AS "2023-04-13",
+    SUM(CASE WHEN date = '2023-04-14' THEN number_of_visitors ELSE 0 END) AS "2023-04-14"
+FROM Pagesvisited
+GROUP BY pages;
+
+-- AVG TIMESPENT
+SELECT 'Home' AS PAGES, AVG(TimeSpent)
+FROM april_data
+WHERE VisitedPages LIKE '%Home%' AND DATE(VisitDate)<='2023-04-14'
+UNION ALL
+SELECT 'Register Button' AS PAGES, AVG(TimeSpent)
+FROM april_data
+WHERE VisitedPages LIKE '%Register Button%' AND DATE(VisitDate)<='2023-04-14'
+UNION ALL
+SELECT 'Payment Page' AS PAGES, AVG(TimeSpent)
+FROM april_data
+WHERE VisitedPages LIKE '%Payment Page%' AND DATE(VisitDate)<='2023-04-14'
+UNION ALL
+SELECT 'Payment Success' AS PAGES, AVG(TimeSpent)
+FROM april_data
+WHERE VisitedPages LIKE '%Payment Success%' AND DATE(VisitDate)<='2023-04-14'
+;
+
+SELECT COUNT(DISTINCT VISITORID)
+FROM april_data
+WHERE DATE(VisitDate)<='2023-04-14';
+
+
+-- TOTAL NUMBER OF REGISTRATION ALONG WITH DAILY REGISTRATION TREND
+SELECT 'Enrolled' AS STATUS, COUNT(DISTINCT VISITORID)
+FROM april_data
+WHERE Status='Enrolled' AND DATE(VisitDate)<='2023-04-14'
+UNION
+SELECT 'Visited' AS STATUS, COUNT(DISTINCT VISITORID)
+FROM april_data
+WHERE Status='Visited' AND DATE(VisitDate)<='2023-04-14' 
+AND VISITORID NOT IN(
+					SELECT DISTINCT VISITORID
+					FROM april_data
+					WHERE Status='Enrolled' AND DATE(VisitDate)<='2023-04-14');
+
+SELECT DATE(VisitDate) AS DATE, COUNT(DISTINCT VisitorID) AS REGISTERED
+FROM april_data
+WHERE Status='Enrolled' AND (VisitDate)<='2023-04-14'
+GROUP BY DATE(VisitDate);
+
+SELECT DATE(VisitDate) AS DATE, COUNT(DISTINCT CASE WHEN Status='Enrolled' THEN  VisitorID END) AS REGISTERED
+FROM april_data
+WHERE DATE(VisitDate)<='2023-04-14'
+GROUP BY DATE(VisitDate);
+
+-- CONVERSION RATE
+WITH CONVERSION AS(
+SELECT 
+COUNT(DISTINCT CASE WHEN STATUS='Enrolled' THEN VISITORID END) AS TOTAL_ENROLLED,
+COUNT(DISTINCT VISITORID) AS TOTAL_VISITORS
+FROM april_data
+WHERE DATE(VisitDate)<='2023-04-14')
+SELECT TOTAL_ENROLLED, TOTAL_VISITORS, ROUND(TOTAL_ENROLLED*100/TOTAL_VISITORS,2) AS CONVERSION_RATE 
+FROM CONVERSION ;
+
+-- ANALYSIS 2
+---------------------------------------- SB2 ---------------------------------------------
+SELECT * FROM may_data;
+
+SELECT COUNT(VISITORID) FROM may_data; -- 1260
+SELECT COUNT(DISTINCT VISITORID) FROM may_data; -- 877
+
+CREATE TABLE SB2_DATA
+SELECT * 
+FROM april_data
+WHERE DATE(VisitDate)>='2023-04-17'
+UNION ALL
+SELECT *
+FROM may_data
+WHERE DATE(VisitDate)<='2023-05-05' AND CourseID='SB2';
+
+SELECT * FROM SB2_DATA;
+
+WITH Pagesvisited AS(
+SELECT 'Home' AS PAGES, DATE(VisitDate) AS DATE, COUNT(DISTINCT VisitorID) AS NUMBER_OF_VISITORS
+FROM sb2_data
+WHERE VisitedPages LIKE '%Home%' AND DATE(VisitDate)>'2023-04-14'
+GROUP BY DATE(VisitDate)
+UNION ALL 
+SELECT 'Courses' AS PAGES, DATE(VisitDate) AS DATE, COUNT(DISTINCT VISITORID) AS NUMBER_OF_VISITORS
+FROM sb2_data
+WHERE VisitedPages LIKE '%Courses%' AND DATE(VisitDate)<='2023-05-05' AND CourseID='SB2'
+GROUP BY DATE(VisitDate)
+UNION ALL
+SELECT 'Course Details' AS PAGES, DATE(VisitDate) AS DATE, COUNT(DISTINCT VISITORID) AS NUMBER_OF_VISITORS
+FROM sb2_data
+WHERE VisitedPages LIKE '%Course Details%' AND DATE(VisitDate)<='2023-05-05' AND CourseID='SB2'
+GROUP BY DATE(VisitDate)
+UNION ALL
+SELECT 'Register Button' AS PAGES, DATE(VisitDate) AS DATE, COUNT(DISTINCT VisitorID) AS NUMBER_OF_VISITORS
+FROM sb2_data
+WHERE VisitedPages LIKE '%Register Button%' AND DATE(VisitDate)>'2023-04-14'
+GROUP BY DATE(VisitDate)
+UNION ALL 
+SELECT 'Payment Page' AS PAGES, DATE(VisitDate) AS DATE, COUNT(DISTINCT VisitorID) AS NUMBER_OF_VISITORS
+FROM sb2_data
+WHERE VisitedPages LIKE '%Payment Page%' AND DATE(VisitDate)>'2023-04-14'
+GROUP BY DATE(VisitDate)
+UNION ALL 
+SELECT 'Payment Success' AS PAGES, DATE(VisitDate) AS DATE, COUNT(DISTINCT VisitorID) AS NUMBER_OF_VISITORS
+FROM sb2_data
+WHERE VisitedPages LIKE '%Payment Success%' AND DATE(VisitDate)>'2023-04-14'
+GROUP BY DATE(VisitDate))
+SELECT
+    pages,
+    SUM(CASE WHEN date = '2023-04-17' THEN number_of_visitors ELSE 0 END) AS "2023-04-17",
+    SUM(CASE WHEN date = '2023-04-18' THEN number_of_visitors ELSE 0 END) AS "2023-04-18",
+    SUM(CASE WHEN date = '2023-04-19' THEN number_of_visitors ELSE 0 END) AS "2023-04-19",
+    SUM(CASE WHEN date = '2023-04-20' THEN number_of_visitors ELSE 0 END) AS "2023-04-20",
+    SUM(CASE WHEN date = '2023-04-21' THEN number_of_visitors ELSE 0 END) AS "2023-04-21",
+    SUM(CASE WHEN date = '2023-04-22' THEN number_of_visitors ELSE 0 END) AS "2023-04-22",
+    SUM(CASE WHEN date = '2023-04-23' THEN number_of_visitors ELSE 0 END) AS "2023-04-23",
+    SUM(CASE WHEN date = '2023-04-24' THEN number_of_visitors ELSE 0 END) AS "2023-04-24",
+    SUM(CASE WHEN date = '2023-04-25' THEN number_of_visitors ELSE 0 END) AS "2023-04-25",
+    SUM(CASE WHEN date = '2023-04-26' THEN number_of_visitors ELSE 0 END) AS "2023-04-26",
+    SUM(CASE WHEN date = '2023-04-27' THEN number_of_visitors ELSE 0 END) AS "2023-04-27",
+    SUM(CASE WHEN date = '2023-04-28' THEN number_of_visitors ELSE 0 END) AS "2023-04-28",
+    SUM(CASE WHEN date = '2023-04-29' THEN number_of_visitors ELSE 0 END) AS "2023-04-29",
+    SUM(CASE WHEN date = '2023-04-30' THEN number_of_visitors ELSE 0 END) AS "2023-04-30",
+    SUM(CASE WHEN DATE = '2023-05-01' THEN number_of_visitors ELSE 0 END) AS '2023-05-01',
+	SUM(CASE WHEN DATE = '2023-05-02' THEN number_of_visitors ELSE 0 END) AS '2023-05-02',
+	SUM(CASE WHEN DATE = '2023-05-03' THEN number_of_visitors ELSE 0 END) AS '2023-05-03',
+	SUM(CASE WHEN DATE = '2023-05-04' THEN number_of_visitors ELSE 0 END) AS '2023-05-04',
+	SUM(CASE WHEN DATE = '2023-05-05' THEN number_of_visitors ELSE 0 END) AS '2023-05-05'
+FROM Pagesvisited
+GROUP BY pages;
+
+-- AVG TIMESPENT
+SELECT 'Home' AS PAGES, AVG(TimeSpent)
+FROM sb2_data
+WHERE VisitedPages LIKE '%Home%' AND DATE(VisitDate)<='2023-05-05' AND (CourseID='SB2' OR CourseID IS NULL)
+UNION ALL
+SELECT 'Courses' AS PAGES, AVG(TimeSpent)
+FROM sb2_data
+WHERE VisitedPages LIKE '%Courses%' AND DATE(VisitDate)<='2023-05-05' AND CourseID='SB2'
+UNION ALL
+SELECT 'Course Details' AS PAGES, AVG(TimeSpent)
+FROM sb2_data
+WHERE VisitedPages LIKE '%Course Details%' AND DATE(VisitDate)<='2023-05-05' AND CourseID='SB2'
+UNION ALL
+SELECT 'Register Button' AS PAGES, AVG(TimeSpent)
+FROM sb2_data
+WHERE VisitedPages LIKE '%Register Button%' AND DATE(VisitDate)<='2023-05-05' AND CourseID='SB2'
+UNION ALL
+SELECT 'Payment Page' AS PAGES, AVG(TimeSpent)
+FROM sb2_data
+WHERE VisitedPages LIKE '%Payment Page%' AND DATE(VisitDate)<='2023-05-05' AND CourseID='SB2'
+UNION ALL
+SELECT 'Payment Success' AS PAGES, AVG(TimeSpent)
+FROM sb2_data
+WHERE VisitedPages LIKE '%Payment Success%' AND DATE(VisitDate)<='2023-05-05' AND CourseID='SB2'
+;
+
+-- TOTAL NUMBER OF REGISTRATION ALONG WITH DAILY REGISTRATION TREND
+SELECT 'Enrolled' AS STATUS, COUNT(DISTINCT VISITORID)
+FROM sb2_data
+WHERE Status='Enrolled' AND DATE(VisitDate)<='2023-05-05' AND CourseID='SB2'
+UNION
+SELECT 'Visited' AS STATUS, COUNT(DISTINCT VISITORID)
+FROM sb2_data
+WHERE Status='Visited' AND DATE(VisitDate)<='2023-05-05' AND (CourseID='SB2' OR CourseID IS NULL)
+AND VISITORID NOT IN(
+					SELECT DISTINCT VISITORID
+					FROM sb2_data
+					WHERE Status='Enrolled' AND DATE(VisitDate)<='2023-05-05' AND CourseID='SB2');
+
+SELECT DATE(VisitDate) AS DATE, COUNT(DISTINCT VisitorID) AS REGISTERED
+FROM sb2_data
+WHERE Status='Enrolled' AND (VisitDate)<='2023-05-05' AND CourseID='SB2'
+GROUP BY DATE(VisitDate);
+
+-- CONVERSION RATE
+WITH CONVERSION AS(
+SELECT 
+COUNT(DISTINCT CASE WHEN STATUS='Enrolled' AND CourseID='SB2' THEN VISITORID END) AS TOTAL_ENROLLED,
+COUNT(DISTINCT VISITORID) AS TOTAL_VISITORS
+FROM sb2_data
+WHERE DATE(VisitDate)<='2023-05-05' AND (CourseID='SB2' OR CourseID IS NULL))
+SELECT TOTAL_ENROLLED, TOTAL_VISITORS, ROUND(TOTAL_ENROLLED*100/TOTAL_VISITORS, 2) AS CONVERSION_RATE 
+FROM CONVERSION;
+
+SELECT * 
+FROM may_data
+WHERE VisitedPages LIKE '%Payment Success%' AND Status='Visited';  -- IN DATE  MAY 8 AND MAY 11 
+
+SELECT COUNT(*) 
+FROM may_data
+WHERE VisitedPages LIKE '%Payment Success%' AND Status='Visited';
+
+SELECT COUNT(VISITORID) 
+FROM may_data
+WHERE DATE(VisitDate)<='2023-05-19' AND (CourseID='SB3' OR CourseID IS NULL); -- 593
+
+SELECT COUNT(DISTINCT VISITORID) 
+FROM may_data
+WHERE DATE(VisitDate)<='2023-05-19' AND (CourseID='SB3' OR CourseID IS NULL); -- 385
+
+-- DAILY UNIQUE VISITORS ON EACH PAGE (MAY)
+WITH VISITOR_TBLE AS(
+SELECT 'Home' AS PAGES, DATE(VisitDate) AS DATE, COUNT(DISTINCT VISITORID) AS NUMBER_OF_VISITORS
+FROM may_data
+WHERE VisitedPages LIKE '%Home%' AND DATE(VisitDate)<='2023-05-05' AND (CourseID='SB2' OR CourseID IS NULL)
+GROUP BY DATE(VisitDate)
+UNION ALL
+SELECT 'Courses' AS PAGES, DATE(VisitDate) AS DATE, COUNT(DISTINCT VISITORID) AS NUMBER_OF_VISITORS
+FROM may_data
+WHERE VisitedPages LIKE '%Courses%' AND DATE(VisitDate)<='2023-05-05' AND CourseID='SB2'
+GROUP BY DATE(VisitDate)
+UNION ALL
+SELECT 'Course Details' AS PAGES, DATE(VisitDate) AS DATE, COUNT(DISTINCT VISITORID) AS NUMBER_OF_VISITORS
+FROM may_data
+WHERE VisitedPages LIKE '%Course Details%' AND DATE(VisitDate)<='2023-05-05' AND CourseID='SB2'
+GROUP BY DATE(VisitDate)
+UNION ALL
+SELECT 'Register Button' AS PAGES, DATE(VisitDate) AS DATE, COUNT(DISTINCT VISITORID) AS NUMBER_OF_VISITORS
+FROM may_data
+WHERE VisitedPages LIKE '%Register Button%' AND DATE(VisitDate)<='2023-05-05' AND CourseID='SB2'
+GROUP BY DATE(VisitDate)
+UNION ALL
+SELECT 'Payment Page' AS PAGES, DATE(VisitDate) AS DATE, COUNT(DISTINCT VISITORID) AS NUMBER_OF_VISITORS
+FROM may_data
+WHERE VisitedPages LIKE '%Payment Page%' AND DATE(VisitDate)<='2023-05-05' AND CourseID='SB2'
+GROUP BY DATE(VisitDate)
+UNION ALL
+SELECT 'Payment Success' AS PAGES, DATE(VisitDate) AS DATE, COUNT(DISTINCT VISITORID) AS NUMBER_OF_VISITORS
+FROM may_data
+WHERE VisitedPages LIKE '%Payment Success%' AND DATE(VisitDate)<='2023-05-05' AND CourseID='SB2'
+GROUP BY DATE(VisitDate))
+SELECT PAGES, 
+SUM(CASE WHEN DATE='2023-05-01' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-01',
+SUM(CASE WHEN DATE='2023-05-02' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-02',
+SUM(CASE WHEN DATE='2023-05-03' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-03',
+SUM(CASE WHEN DATE='2023-05-04' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-04',
+SUM(CASE WHEN DATE='2023-05-05' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-05'
+FROM VISITOR_TBLE
+GROUP BY PAGES
+;
+
+-- AVG TIMESPENT
+SELECT 'Home' AS PAGES, AVG(TimeSpent)
+FROM may_data
+WHERE VisitedPages LIKE '%Home%' AND DATE(VisitDate)<='2023-05-05' AND (CourseID='SB2' OR CourseID IS NULL)
+UNION ALL
+SELECT 'Courses' AS PAGES, AVG(TimeSpent)
+FROM may_data
+WHERE VisitedPages LIKE '%Courses%' AND DATE(VisitDate)<='2023-05-05' AND CourseID='SB2'
+UNION ALL
+SELECT 'Course Details' AS PAGES, AVG(TimeSpent)
+FROM may_data
+WHERE VisitedPages LIKE '%Course Details%' AND DATE(VisitDate)<='2023-05-05' AND CourseID='SB2'
+UNION ALL
+SELECT 'Register Button' AS PAGES, AVG(TimeSpent)
+FROM may_data
+WHERE VisitedPages LIKE '%Register Button%' AND DATE(VisitDate)<='2023-05-05' AND CourseID='SB2'
+UNION ALL
+SELECT 'Payment Page' AS PAGES, AVG(TimeSpent)
+FROM may_data
+WHERE VisitedPages LIKE '%Payment Page%' AND DATE(VisitDate)<='2023-05-05' AND CourseID='SB2'
+UNION ALL
+SELECT 'Payment Success' AS PAGES, AVG(TimeSpent)
+FROM may_data
+WHERE VisitedPages LIKE '%Payment Success%' AND DATE(VisitDate)<='2023-05-05' AND CourseID='SB2'
+;
+
+-- TOTAL NUMBER OF REGISTRATION ALONG WITH DAILY REGISTRATION TREND
+SELECT 'Enrolled' AS STATUS, COUNT(DISTINCT VISITORID)
+FROM may_data
+WHERE Status='Enrolled' AND DATE(VisitDate)<='2023-05-05' AND CourseID='SB2'
+UNION
+SELECT 'Visited' AS STATUS, COUNT(DISTINCT VISITORID)
+FROM may_data
+WHERE Status='Visited' AND DATE(VisitDate)<='2023-05-05' AND (CourseID='SB2' OR CourseID IS NULL)
+AND VISITORID NOT IN(
+					SELECT DISTINCT VISITORID
+					FROM may_data
+					WHERE Status='Enrolled' AND DATE(VisitDate)<='2023-05-05' AND CourseID='SB2');
+
+SELECT DATE(VisitDate) AS DATE, COUNT(DISTINCT VisitorID) AS REGISTERED
+FROM may_data
+WHERE Status='Enrolled' AND (VisitDate)<='2023-05-05' AND CourseID='SB2'
+GROUP BY DATE(VisitDate);
+
+-- CONVERSION RATE
+WITH CONVERSION AS(
+SELECT 
+COUNT(DISTINCT CASE WHEN STATUS='Enrolled' AND CourseID='SB2' THEN VISITORID END) AS TOTAL_ENROLLED,
+COUNT(DISTINCT VISITORID) AS TOTAL_VISITORS
+FROM may_data
+WHERE DATE(VisitDate)<='2023-05-05' AND (CourseID='SB2' OR CourseID IS NULL))
+SELECT TOTAL_ENROLLED, TOTAL_VISITORS, ROUND(TOTAL_ENROLLED*100/TOTAL_VISITORS, 2) AS CONVERSION_RATE 
+FROM CONVERSION;
+
+------------------------------------------- SB3 -------------------------------------------------
+-- DAILY UNIQUE VISITORS ON EACH PAGE (MAY SB3)
+WITH VISITOR_TBLE AS(
+SELECT 'Home' AS PAGES, DATE(VisitDate) AS DATE, COUNT(DISTINCT VISITORID) AS NUMBER_OF_VISITORS
+FROM may_data
+WHERE VisitedPages LIKE '%Home%' AND DATE(VisitDate)<='2023-05-19' AND (CourseID='SB3' OR CourseID IS NULL)
+GROUP BY DATE(VisitDate)
+UNION ALL
+SELECT 'Courses' AS PAGES, DATE(VisitDate) AS DATE, COUNT(DISTINCT VISITORID) AS NUMBER_OF_VISITORS
+FROM may_data
+WHERE VisitedPages LIKE '%Courses%' AND DATE(VisitDate)<='2023-05-19' AND CourseID='SB3'
+GROUP BY DATE(VisitDate)
+UNION ALL
+SELECT 'Course Details' AS PAGES, DATE(VisitDate) AS DATE, COUNT(DISTINCT VISITORID) AS NUMBER_OF_VISITORS
+FROM may_data
+WHERE VisitedPages LIKE '%Course Details%' AND DATE(VisitDate)<='2023-05-19' AND CourseID='SB3'
+GROUP BY DATE(VisitDate)
+UNION ALL
+SELECT 'Register Button' AS PAGES, DATE(VisitDate) AS DATE, COUNT(DISTINCT VISITORID) AS NUMBER_OF_VISITORS
+FROM may_data
+WHERE VisitedPages LIKE '%Register Button%' AND DATE(VisitDate)<='2023-05-19' AND CourseID='SB3'
+GROUP BY DATE(VisitDate)
+UNION ALL
+SELECT 'Payment Page' AS PAGES, DATE(VisitDate) AS DATE, COUNT(DISTINCT VISITORID) AS NUMBER_OF_VISITORS
+FROM may_data
+WHERE VisitedPages LIKE '%Payment Page%' AND DATE(VisitDate)<='2023-05-19' AND CourseID='SB3'
+GROUP BY DATE(VisitDate)
+UNION ALL
+SELECT 'Payment Success' AS PAGES, DATE(VisitDate) AS DATE, COUNT(DISTINCT VISITORID) AS NUMBER_OF_VISITORS
+FROM may_data
+WHERE VisitedPages LIKE '%Payment Success%' AND DATE(VisitDate)<='2023-05-19' AND CourseID='SB3'
+GROUP BY DATE(VisitDate))
+SELECT PAGES, 
+SUM(CASE WHEN DATE='2023-05-01' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-01',
+SUM(CASE WHEN DATE='2023-05-02' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-02',
+SUM(CASE WHEN DATE='2023-05-03' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-03',
+SUM(CASE WHEN DATE='2023-05-04' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-04',
+SUM(CASE WHEN DATE='2023-05-05' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-05',
+SUM(CASE WHEN DATE='2023-05-06' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-06',
+SUM(CASE WHEN DATE='2023-05-07' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-07',
+SUM(CASE WHEN DATE='2023-05-08' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-08',
+SUM(CASE WHEN DATE='2023-05-09' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-09',
+SUM(CASE WHEN DATE='2023-05-10' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-10',
+SUM(CASE WHEN DATE='2023-05-11' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-11',
+SUM(CASE WHEN DATE='2023-05-12' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-12',
+SUM(CASE WHEN DATE='2023-05-13' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-13',
+SUM(CASE WHEN DATE='2023-05-14' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-14',
+SUM(CASE WHEN DATE='2023-05-15' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-15',
+SUM(CASE WHEN DATE='2023-05-16' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-16',
+SUM(CASE WHEN DATE='2023-05-17' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-17',
+SUM(CASE WHEN DATE='2023-05-18' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-18',
+SUM(CASE WHEN DATE='2023-05-19' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-19'
+FROM VISITOR_TBLE
+GROUP BY PAGES
+;
+
+-- AVG TIMESPENT
+SELECT 'Home' AS PAGES, AVG(TimeSpent)
+FROM may_data
+WHERE VisitedPages LIKE '%Home%' AND DATE(VisitDate)<='2023-05-19' AND (CourseID='SB3' OR CourseID IS NULL)
+UNION ALL
+SELECT 'Courses' AS PAGES, AVG(TimeSpent)
+FROM may_data
+WHERE VisitedPages LIKE '%Courses%' AND DATE(VisitDate)<='2023-05-19' AND CourseID='SB3'
+UNION ALL
+SELECT 'Course Details' AS PAGES, AVG(TimeSpent)
+FROM may_data
+WHERE VisitedPages LIKE '%Course Details%' AND DATE(VisitDate)<='2023-05-19' AND CourseID='SB3'
+UNION ALL
+SELECT 'Register Button' AS PAGES, AVG(TimeSpent)
+FROM may_data
+WHERE VisitedPages LIKE '%Register Button%' AND DATE(VisitDate)<='2023-05-19' AND CourseID='SB3'
+UNION ALL
+SELECT 'Payment Page' AS PAGES, AVG(TimeSpent)
+FROM may_data
+WHERE VisitedPages LIKE '%Payment Page%' AND DATE(VisitDate)<='2023-05-19' AND CourseID='SB3'
+UNION ALL
+SELECT 'Payment Success' AS PAGES, AVG(TimeSpent)
+FROM may_data
+WHERE VisitedPages LIKE '%Payment Success%' AND DATE(VisitDate)<='2023-05-19' AND CourseID='SB3'
+;
+
+-- TOTAL NUMBER OF REGISTRATION ALONG WITH DAILY REGISTRATION TREND
+SELECT 'Enrolled' AS STATUS, COUNT(DISTINCT VISITORID)
+FROM may_data
+WHERE VisitedPages LIKE '%Payment Success%' AND DATE(VisitDate)<='2023-05-19' AND CourseID='SB3'
+UNION
+SELECT 'Visited' AS STATUS, COUNT(DISTINCT VISITORID)
+FROM may_data
+WHERE Status='Visited' AND DATE(VisitDate)<='2023-05-19' AND (CourseID='SB3' OR CourseID IS NULL)
+AND VISITORID NOT IN(
+					SELECT DISTINCT VISITORID
+					FROM may_data
+					WHERE VisitedPages LIKE '%Payment Success%' AND DATE(VisitDate)<='2023-05-19' AND CourseID='SB3');
+				
+SELECT DATE(VisitDate) AS DATE, COUNT(DISTINCT VisitorID) AS REGISTERED
+FROM may_data
+WHERE VisitedPages LIKE '%Payment Success%' AND (VisitDate)<='2023-05-19' AND CourseID='SB3'
+GROUP BY DATE(VisitDate);
+
+-- CONVERSION RATE
+WITH CONVERSION AS(
+SELECT 
+COUNT(DISTINCT CASE WHEN VisitedPages LIKE '%Payment Success%' THEN VISITORID END) AS TOTAL_ENROLLED,
+COUNT(DISTINCT VISITORID) AS TOTAL_VISITORS
+FROM may_data
+WHERE DATE(VisitDate)<='2023-05-19' AND (CourseID='SB3' OR CourseID IS NULL))
+SELECT TOTAL_ENROLLED, TOTAL_VISITORS, ROUND(TOTAL_ENROLLED*100/TOTAL_VISITORS, 2) AS CONVERSION_RATE 
+FROM CONVERSION;
+
+-- ANALYSIS 3
+-------------------------------------- SB4 ------------------------------------------------
+SELECT COUNT(VISITORID) 
+FROM may_data
+WHERE DATE(VisitDate)>'2023-05-19' AND (CourseID='SB4' OR CourseID IS NULL); -- 460
+
+SELECT COUNT(DISTINCT VISITORID) 
+FROM may_data
+WHERE DATE(VisitDate)>'2023-05-19' AND (CourseID='SB4' OR CourseID IS NULL); -- 387
+
+SELECT COUNT(DISTINCT VISITORID) 
+FROM may_data
+WHERE DATE(VisitDate)>'2023-05-19' AND CourseID='SB4'; -- 363
+
+SELECT COUNT(DISTINCT VISITORID) 
+FROM may_data
+WHERE DATE(VisitDate)>'2023-05-19' AND CourseID IS NULL AND VisitorID NOT IN(SELECT VISITORID 
+FROM may_data
+WHERE DATE(VisitDate)>'2023-05-19' AND CourseID='SB4'); -- 24
+
+-- DAILY UNIQUE VISITORS ON EACH PAGE (MAY SB4)
+WITH VISITOR_TBLE AS(
+SELECT 'Home' AS PAGES, DATE(VisitDate) AS DATE, COUNT(DISTINCT VISITORID) AS NUMBER_OF_VISITORS
+FROM may_data
+WHERE VisitedPages LIKE '%Home%' AND DATE(VisitDate)>'2023-05-19' AND (CourseID='SB4' OR CourseID IS NULL)
+GROUP BY DATE(VisitDate)
+UNION ALL
+SELECT 'Courses' AS PAGES, DATE(VisitDate) AS DATE, COUNT(DISTINCT VISITORID) AS NUMBER_OF_VISITORS
+FROM may_data
+WHERE VisitedPages LIKE '%Courses%' AND DATE(VisitDate)>'2023-05-19' AND CourseID='SB4'
+GROUP BY DATE(VisitDate)
+UNION ALL
+SELECT 'Course Details' AS PAGES, DATE(VisitDate) AS DATE, COUNT(DISTINCT VISITORID) AS NUMBER_OF_VISITORS
+FROM may_data
+WHERE VisitedPages LIKE '%Course Details%' AND DATE(VisitDate)>'2023-05-19' AND CourseID='SB4'
+GROUP BY DATE(VisitDate)
+UNION ALL
+SELECT 'Register Button' AS PAGES, DATE(VisitDate) AS DATE, COUNT(DISTINCT VISITORID) AS NUMBER_OF_VISITORS
+FROM may_data
+WHERE VisitedPages LIKE '%Register Button%' AND DATE(VisitDate)>'2023-05-19' AND CourseID='SB4'
+GROUP BY DATE(VisitDate)
+UNION ALL
+SELECT 'Payment Page' AS PAGES, DATE(VisitDate) AS DATE, COUNT(DISTINCT VISITORID) AS NUMBER_OF_VISITORS
+FROM may_data
+WHERE VisitedPages LIKE '%Payment Page%' AND DATE(VisitDate)>'2023-05-19' AND CourseID='SB4'
+GROUP BY DATE(VisitDate)
+UNION ALL
+SELECT 'Payment Success' AS PAGES, DATE(VisitDate) AS DATE, COUNT(DISTINCT VISITORID) AS NUMBER_OF_VISITORS
+FROM may_data
+WHERE VisitedPages LIKE '%Payment Success%' AND DATE(VisitDate)>'2023-05-19' AND CourseID='SB4'
+GROUP BY DATE(VisitDate))
+SELECT PAGES, 
+SUM(CASE WHEN DATE='2023-05-22' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-22',
+SUM(CASE WHEN DATE='2023-05-23' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-23',
+SUM(CASE WHEN DATE='2023-05-24' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-24',
+SUM(CASE WHEN DATE='2023-05-25' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-25',
+SUM(CASE WHEN DATE='2023-05-26' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-26',
+SUM(CASE WHEN DATE='2023-05-27' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-27',
+SUM(CASE WHEN DATE='2023-05-28' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-28',
+SUM(CASE WHEN DATE='2023-05-29' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-29',
+SUM(CASE WHEN DATE='2023-05-30' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-30',
+SUM(CASE WHEN DATE='2023-05-31' THEN NUMBER_OF_VISITORS ELSE 0 END) AS '2023-05-31'
+FROM VISITOR_TBLE
+GROUP BY PAGES
+;
+
+-- AVG TIMESPENT
+SELECT 'Home' AS PAGES, AVG(TimeSpent)
+FROM may_data
+WHERE VisitedPages LIKE '%Home%' AND DATE(VisitDate)>'2023-05-19' AND (CourseID='SB4' OR CourseID IS NULL)
+UNION ALL
+SELECT 'Courses' AS PAGES, AVG(TimeSpent)
+FROM may_data
+WHERE VisitedPages LIKE '%Courses%' AND DATE(VisitDate)>'2023-05-19' AND CourseID='SB4'
+UNION ALL
+SELECT 'Course Details' AS PAGES, AVG(TimeSpent)
+FROM may_data
+WHERE VisitedPages LIKE '%Course Details%' AND DATE(VisitDate)>'2023-05-19' AND CourseID='SB4'
+UNION ALL
+SELECT 'Register Button' AS PAGES, AVG(TimeSpent)
+FROM may_data
+WHERE VisitedPages LIKE '%Register Button%' AND DATE(VisitDate)>'2023-05-19' AND CourseID='SB4'
+UNION ALL
+SELECT 'Payment Page' AS PAGES, AVG(TimeSpent)
+FROM may_data
+WHERE VisitedPages LIKE '%Payment Page%' AND DATE(VisitDate)>'2023-05-19' AND CourseID='SB4'
+UNION ALL
+SELECT 'Payment Success' AS PAGES, AVG(TimeSpent)
+FROM may_data
+WHERE VisitedPages LIKE '%Payment Success%' AND DATE(VisitDate)>'2023-05-19' AND CourseID='SB4'
+;
+
+-- TOTAL NUMBER OF REGISTRATION ALONG WITH DAILY REGISTRATION TREND
+SELECT 'Enrolled' AS STATUS, COUNT(DISTINCT VISITORID)
+FROM may_data
+WHERE VisitedPages LIKE '%Payment Success%' AND DATE(VisitDate)>'2023-05-19' AND CourseID='SB4'
+UNION
+SELECT 'Visited' AS STATUS, COUNT(DISTINCT VISITORID)
+FROM may_data
+WHERE Status='Visited' AND DATE(VisitDate)>'2023-05-19' AND (CourseID='SB4' OR CourseID IS NULL)
+AND VISITORID NOT IN(
+					SELECT DISTINCT VISITORID
+					FROM may_data
+					WHERE VisitedPages LIKE '%Payment Success%' AND DATE(VisitDate)>'2023-05-19' AND CourseID='SB4');
+				
+SELECT DATE(VisitDate) AS DATE, COUNT(DISTINCT VisitorID) AS REGISTERED
+FROM may_data
+WHERE Status='Enrolled' AND (VisitDate)>'2023-05-19' AND CourseID='SB4'
+GROUP BY DATE(VisitDate);
+
+-- CONVERSION RATE
+WITH CONVERSION AS(
+SELECT 
+COUNT(DISTINCT CASE WHEN VisitedPages LIKE '%Payment Success%' THEN VISITORID END) AS TOTAL_ENROLLED,
+COUNT(DISTINCT VISITORID) AS TOTAL_VISITORS
+FROM may_data
+WHERE DATE(VisitDate)>'2023-05-19' AND (CourseID='SB4' OR CourseID IS NULL))
+SELECT TOTAL_ENROLLED, TOTAL_VISITORS, ROUND(TOTAL_ENROLLED*100/TOTAL_VISITORS, 2) AS CONVERSION_RATE 
+FROM CONVERSION;
+
+-- ANALYSIS 4
+
+SELECT COUNT(DISTINCT VisitorID)
+FROM june_data
+WHERE CourseID='EB1' OR CourseID IS NULL ; -- 833
+
+SELECT COUNT(DISTINCT VisitorID)
+FROM june_data
+WHERE CourseID='EB1'; -- 741
+
+SELECT COUNT(DISTINCT VisitorID)
+FROM june_data
+WHERE CourseID IS NULL AND VisitorID NOT IN (SELECT DISTINCT VisitorID FROM june_data WHERE CourseID='EB1'); -- 92
+
+SELECT * 
+FROM june_data
+WHERE VisitedPages LIKE '%Payment Success%' AND Status='Visited';
+
+SELECT COUNT(*) FROM june_data
+WHERE DATE(VisitDate)='2023-06-01' AND CampaignID='YT2';
+
+SELECT COUNT(*) FROM june_data
+WHERE DATE(VisitDate)='2023-06-01' AND CampaignID='YT2' AND Status='Enrolled'; -- 16
+
+SELECT COUNT(*) FROM june_data
+WHERE DATE(VisitDate)='2023-06-01' AND CampaignID='IG3' AND Status='Enrolled'; -- 6
+
+SELECT COUNT(*) FROM june_data
+WHERE DATE(VisitDate)='2023-06-02' AND CampaignID='IG3' AND Status='Enrolled'; -- 5
+
+/*
+CREATE TABLE campaign_metrics_june_updated
+SELECT * FROM campaign_metrics_june;
+
+INSERT INTO campaign_metrics_june_updated
+('IG3', '2023-06-01', 
+*/
+------------------------------------------- EXCEL EB1 -----------------------------------------
+
+CREATE TABLE BUDGET_TABLE
+SELECT j.*,C.course, c.budget FROM campaign_metrics_june j
+LEFT JOIN campaigns c ON j.campaign_id=c.campaign_id
+WHERE (c.campaign_id='YT2' AND c.course='SQLB1') OR c.campaign_id='FB1' OR c.campaign_id='IG3' ;
+
+-- CLICK THROUGH RATE
+SELECT 
+SUM(clicks + conversions) AS TOTAL_CLICKS,
+SUM(impressions) AS TOTAL_IMPRESSION,
+ROUND(SUM(clicks + conversions)*100/SUM(impressions),2) AS CLICK_THROUGH_RATE
+FROM budget_table
+WHERE campaign_id='FB1';
+
+SELECT date,
+clicks + conversions AS TOTAL_CLICKS,
+impressions AS TOTAL_IMPRESSION,
+ROUND((clicks + conversions)*100/impressions,2) AS CLICK_THROUGH_RATE
+FROM budget_table
+WHERE campaign_id='FB1';
+
+-- COST PER CLICK
+SELECT SUM(BUDGET) AS BUDGET, SUM(clicks + conversions) AS TOTAL_CLICKS,
+ROUND(SUM(BUDGET)/SUM(clicks + conversions),2) AS COST_PER_CLICK
+FROM budget_table
+WHERE campaign_id='FB1'
+GROUP BY BUDGET;
+
+-- COST PER ACQUISITION
+SELECT SUM(BUDGET) AS BUDGET, SUM(conversions) AS TOTAL_CLICKS,
+ROUND(SUM(BUDGET)/SUM(conversions),2) AS COST_PER_CLICK
+FROM budget_table
+WHERE campaign_id='FB1'
+GROUP BY BUDGET;
+       
+-- CONVERSION RATE
+SELECT SUM(CONVERSIONS) AS CONVERSION,
+SUM(clicks+conversions) AS VISITORS,
+ROUND(SUM(CONVERSIONS)*100/SUM(clicks+conversions),2) AS CONVERSION_RATE
+FROM budget_table
+WHERE campaign_id='FB1';
+
+---------------------------------------- SQLB1 ( YTB2 ) ----------------------------------------
+-- CLICK THROUGH RATE
+SELECT 
+SUM(clicks + conversions) AS TOTAL_CLICKS,
+SUM(impressions) AS TOTAL_IMPRESSION,
+ROUND(SUM(clicks + conversions)*100/SUM(impressions),2) AS CLICK_THROUGH_RATE
+FROM budget_table
+WHERE campaign_id='YT2';
+
+SELECT date,
+clicks + conversions AS TOTAL_CLICKS,
+impressions AS TOTAL_IMPRESSION,
+ROUND((clicks + conversions)*100/impressions,2) AS CLICK_THROUGH_RATE
+FROM budget_table
+WHERE campaign_id='YT2';
+
+-- COST PER CLICK
+SELECT SUM(BUDGET) AS BUDGET, SUM(clicks + conversions) AS TOTAL_CLICKS,
+ROUND(SUM(BUDGET)/SUM(clicks + conversions),2) AS COST_PER_CLICK
+FROM budget_table
+WHERE campaign_id='YT2'
+GROUP BY BUDGET;
+
+-- COST PER ACQUISITION
+SELECT SUM(BUDGET) AS BUDGET, SUM(conversions) AS TOTAL_CLICKS,
+ROUND(SUM(BUDGET)/SUM(conversions),2) AS COST_PER_CLICK
+FROM budget_table
+WHERE campaign_id='YT2'
+GROUP BY BUDGET;
+       
+-- CONVERSION RATE
+SELECT SUM(CONVERSIONS) AS CONVERSION,
+SUM(clicks+conversions) AS VISITORS,
+ROUND(SUM(CONVERSIONS)*100/SUM(clicks+conversions),2) AS CONVERSION_RATE
+FROM budget_table
+WHERE campaign_id='YT2';
+
+------------------------ SQLB1 ( IG3 ) ------------------------------
+-- CLICK THROUGH RATE
+SELECT 
+SUM(clicks + conversions) AS TOTAL_CLICKS,
+SUM(impressions) AS TOTAL_IMPRESSION,
+ROUND(SUM(clicks + conversions)*100/SUM(impressions),2) AS CLICK_THROUGH_RATE
+FROM budget_table
+WHERE campaign_id='IG3';
+
+SELECT date,
+clicks + conversions AS TOTAL_CLICKS,
+impressions AS TOTAL_IMPRESSION,
+ROUND((clicks + conversions)*100/impressions,2) AS CLICK_THROUGH_RATE
+FROM budget_table
+WHERE campaign_id='IG3';
+
+-- COST PER CLICK
+SELECT SUM(BUDGET) AS BUDGET, SUM(clicks + conversions) AS TOTAL_CLICKS,
+ROUND(SUM(BUDGET)/SUM(clicks + conversions),2) AS COST_PER_CLICK
+FROM budget_table
+WHERE campaign_id='IG3'
+;
+
+-- COST PER ACQUISITION
+SELECT SUM(BUDGET) AS BUDGET, SUM(conversions) AS TOTAL_CLICKS,
+ROUND(SUM(BUDGET)/SUM(conversions),2) AS COST_PER_CLICK
+FROM budget_table
+WHERE campaign_id='IG3';
+       
+-- CONVERSION RATE
+SELECT SUM(CONVERSIONS) AS CONVERSION,
+SUM(clicks+conversions) AS VISITORS,
+ROUND(SUM(CONVERSIONS)*100/SUM(clicks+conversions),2) AS CONVERSION_RATE
+FROM budget_table
+WHERE campaign_id='IG3';
+
+
+------------------------------------------------------------------------------------------------------------------------------------
+-- OVER ALL CLICK THROUGH RATE
+SELECT campaign_id, course,
+SUM(clicks + conversions) AS TOTAL_CLICKS,
+SUM(impressions) AS TOTAL_IMPRESSION,
+ROUND(SUM(clicks + conversions)*100/SUM(impressions),2) AS CLICK_THROUGH_RATE
+FROM budget_table
+GROUP BY  campaign_id, course;
+
+SELECT date, campaign_id, course,
+clicks + conversions AS TOTAL_CLICKS,
+impressions AS TOTAL_IMPRESSION,
+ROUND((clicks + conversions)*100/impressions,2) AS CLICK_THROUGH_RATE
+FROM budget_table;
+
+-- COST PER CLICK
+SELECT campaign_id, course,
+SUM(BUDGET) AS BUDGET, SUM(clicks + conversions) AS TOTAL_CLICKS,
+ROUND(SUM(BUDGET)/SUM(clicks + conversions),2) AS COST_PER_CLICK
+FROM budget_table
+GROUP BY  campaign_id, course;
+
+-- COST PER ACQUISITION
+SELECT campaign_id, course,
+SUM(BUDGET) AS BUDGET, SUM(conversions) AS TOTAL_CLICKS,
+ROUND(SUM(BUDGET)/SUM(conversions),2) AS COST_PER_ACQUISITION
+FROM budget_table
+GROUP BY campaign_id, course;
+       
+-- CONVERSION RATE
+SELECT campaign_id, course,
+SUM(CONVERSIONS) AS CONVERSION,
+SUM(clicks+conversions) AS VISITORS,
+ROUND(SUM(CONVERSIONS)*100/SUM(clicks+conversions),2) AS CONVERSION_RATE
+FROM budget_table
+GROUP BY campaign_id, course;
+
+SELECT campaign_id, course, Date,
+ROUND(SUM(clicks + conversions)*100/SUM(impressions),2) AS CLICK_THROUGH_RATE,
+ROUND(SUM(BUDGET)/SUM(clicks + conversions),2) AS COST_PER_CLICK,
+ROUND(SUM(BUDGET)/SUM(conversions),2) AS COST_PER_ACQUISITION,
+ROUND(SUM(CONVERSIONS)*100/SUM(clicks+conversions),2) AS CONVERSION_RATE
+FROM budget_table
+GROUP BY campaign_id, course, Date;
+
+------------------------------------------- JUNE 2023 ----------------------------------------------
+SELECT COUNT(DISTINCT VISITORID) FROM june_data;
+
+CREATE TABLE excel_data
+SELECT * FROM june_data
+WHERE (CampaignID='FB1' AND (CourseID='EB1' OR CourseID IS NULL)) OR (CampaignID='' AND CourseID='EB1');
+
+UPDATE excel_data
+SET CampaignID='Content'
+WHERE CampaignID='';
+
+SELECT * FROM excel_data;
+
+-- TOTAL REGISTRATION DAILY TREND END 
+WITH TOTAL_REG AS (SELECT DATE(VISITDATE) AS DATE, CampaignID AS CAMPAIGN,
+COUNT(distinct VisitorID) AS NUMBER_OF_ENROLLMENT
+FROM excel_data
+WHERE Status='Enrolled'
+GROUP BY DATE(VISITDATE), CampaignID)
+SELECT DATE,
+SUM(CASE WHEN CAMPAIGN='Content' THEN NUMBER_OF_ENROLLMENT ELSE 0 END) AS 'Content',
+SUM(CASE WHEN CAMPAIGN='FB1' THEN NUMBER_OF_ENROLLMENT ELSE 0 END) AS 'FB1'
+FROM TOTAL_REG
+GROUP BY DATE;
+
+SELECT 'Home' AS PAGES, AVG(timespent)
+FROM excel_data
+WHERE VisitedPages LIKE '%Home%'
+UNION ALL
+SELECT 'Courses' AS PAGES, AVG(timespent)
+FROM excel_data
+WHERE VisitedPages LIKE '%Courses%'
+UNION ALL 
+SELECT 'Course Details' AS PAGES, AVG(timespent)
+FROM excel_data
+WHERE VisitedPages LIKE '%Course Details%'
+UNION ALL 
+SELECT 'Regiter Button' AS PAGES, AVG(timespent)
+FROM excel_data
+WHERE VisitedPages LIKE '%Register Button%'
+UNION ALL
+SELECT 'Payment Page' AS PAGES, AVG(timespent)
+FROM excel_data
+WHERE VisitedPages LIKE '%Payment Page%'
+UNION ALL
+SELECT 'Payment Success' AS PAGES, AVG(timespent)
+FROM excel_data
+WHERE VisitedPages LIKE '%Payment Success%';
+
+WITH CONVERSION AS (
+SELECT CampaignID, 
+COUNT(DISTINCT CASE WHEN Status='Enrolled' THEN VisitorID END) AS ENROLLED,
+COUNT(DISTINCT VisitorID) AS VISITORS
+FROM excel_data
+GROUP BY CampaignID)
+SELECT CampaignID, ENROLLED, VISITORS, ROUND((ENROLLED*100/VISITORS),2) AS CONVERSION_RATE
+FROM CONVERSION;
+
+CREATE TABLE SQL_DATA
+SELECT * FROM june_data
+WHERE (CampaignID='YT2' AND (CourseID='SQLB1' OR CourseID IS NULL)) OR (CampaignID='IG3' AND (CourseID='SQLB1' OR CourseID IS NULL)) OR (CampaignID='' AND CourseID='SQLB1');
+
+SET SQL_SAFE_UPDATES=0;
+
+UPDATE SQL_DATA
+SET CampaignID='Content'
+WHERE CampaignID='';
+
+UPDATE SQL_DATA
+SET CampaignID='Content'
+WHERE VISITDATE='2023-06-01 00:00:00' AND CampaignID='YT2';
+
+UPDATE SQL_DATA
+SET CampaignID='Content'
+WHERE VISITDATE='2023-06-01 00:00:00' AND CampaignID='IG3';
+
+UPDATE SQL_DATA
+SET CampaignID='Content'
+WHERE VISITDATE='2023-06-02 00:00:00' AND CampaignID='IG3';
+
+SELECT COUNT(*) FROM SQL_DATA;
+
+-- TOTAL REGISTRATION DAILY TREND END 
+WITH TOTAL_REG AS (SELECT DATE(VISITDATE) AS DATE, CampaignID AS CAMPAIGN,
+COUNT(distinct VisitorID) AS NUMBER_OF_ENROLLMENT
+FROM SQL_DATA
+WHERE Status='Enrolled'
+GROUP BY DATE(VISITDATE), CampaignID)
+SELECT DATE,
+SUM(CASE WHEN CAMPAIGN='Content' THEN NUMBER_OF_ENROLLMENT ELSE 0 END) AS 'Content',
+SUM(CASE WHEN CAMPAIGN='YT2' THEN NUMBER_OF_ENROLLMENT ELSE 0 END) AS 'YT2',
+SUM(CASE WHEN CAMPAIGN='IG3' THEN NUMBER_OF_ENROLLMENT ELSE 0 END) AS 'IG3'
+FROM TOTAL_REG
+GROUP BY DATE;
+
+
+-- AVG TIMESPENT
+SELECT 'Home' AS PAGES, AVG(timespent)
+FROM SQL_DATA
+WHERE VisitedPages LIKE '%Home%'
+UNION ALL
+SELECT 'Courses' AS PAGES, AVG(timespent)
+FROM SQL_DATA
+WHERE VisitedPages LIKE '%Courses%'
+UNION ALL 
+SELECT 'Course Details' AS PAGES, AVG(timespent)
+FROM SQL_DATA
+WHERE VisitedPages LIKE '%Course Details%'
+UNION ALL 
+SELECT 'Regiter Button' AS PAGES, AVG(timespent)
+FROM SQL_DATA
+WHERE VisitedPages LIKE '%Register Button%'
+UNION ALL
+SELECT 'Payment Page' AS PAGES, AVG(timespent)
+FROM SQL_DATA
+WHERE VisitedPages LIKE '%Payment Page%'
+UNION ALL
+SELECT 'Payment Success' AS PAGES, AVG(timespent)
+FROM SQL_DATA
+WHERE VisitedPages LIKE '%Payment Success%';
+
+-- CONVERSION RATE
+WITH CONVERSION AS (
+SELECT CampaignID, 
+COUNT(DISTINCT CASE WHEN Status='Enrolled' THEN VisitorID END) AS ENROLLED,
+COUNT(DISTINCT VisitorID) AS VISITORS
+FROM SQL_DATA
+GROUP BY CampaignID)
+SELECT CampaignID, ENROLLED, VISITORS, ROUND((ENROLLED*100/VISITORS),2) AS CONVERSION_RATE
+FROM CONVERSION;
+
+-- ANALYSIS 5
+------ APRIL S1B1
+SELECT 'S1B1' AS COURSE, COUNT(DISTINCT CASE WHEN  a.Status='Enrolled'  AND a.CourseID='S1B1' THEN VISITORID END) AS ENROLLED, SUM(c.Price) AS TOTAL_REVENUE 
+FROM april_data a
+LEFT JOIN course_price c ON a.CourseID=c.Course
+WHERE a.Status='Enrolled' AND a.CourseID='S1B1';
+
+------- APROL SB2
+SELECT 'SB2' AS COURSE, COUNT(DISTINCT CASE WHEN  a.Status='Enrolled'  AND a.CourseID='SB2' THEN VISITORID END) AS ENROLLED, SUM(c.Price) AS TOTAL_REVENUE 
+FROM april_data a
+LEFT JOIN course_price c ON a.CourseID=c.Course
+WHERE a.Status='Enrolled' AND a.CourseID='SB2';
+
+---- APRIL
+SELECT 'APRIL' AS MONTH, COUNT(DISTINCT CASE WHEN  a.Status='Enrolled' THEN VISITORID END) AS ENROLLED,SUM(c.Price) AS TOTAL_REVENUE 
+FROM april_data a
+LEFT JOIN course_price c ON a.CourseID=c.Course
+WHERE a.Status='Enrolled';
+
+--- MAY SB2
+SELECT 'SB2' AS COURSE, COUNT(DISTINCT CASE WHEN  a.Status='Enrolled'  AND a.CourseID='SB2' THEN VISITORID END) AS ENROLLED, SUM(c.Price) AS TOTAL_REVENUE 
+FROM may_data a
+LEFT JOIN course_price c ON a.CourseID=c.Course
+WHERE a.Status='Enrolled' AND a.CourseID='SB2';
+
+--- MAY SB3
+SELECT 'SB3' AS COURSE, COUNT(DISTINCT CASE WHEN  a.VisitedPages LIKE '%Payment Success%'  AND a.CourseID='SB3' THEN VISITORID END) AS ENROLLED, SUM(c.Price) AS TOTAL_REVENUE 
+FROM may_data a
+LEFT JOIN course_price c ON a.CourseID=c.Course
+WHERE a.VisitedPages LIKE '%Payment Success%' AND a.CourseID='SB3';
+
+---- MAY SB4
+SELECT 'SB4' AS COURSE, COUNT(DISTINCT CASE WHEN  a.Status='Enrolled'  AND a.CourseID='SB4' THEN VISITORID END) AS ENROLLED, SUM(c.Price) AS TOTAL_REVENUE 
+FROM may_data a
+LEFT JOIN course_price c ON a.CourseID=c.Course
+WHERE a.Status='Enrolled' AND a.CourseID='SB4';
+
+------- MAY
+SELECT 'SB4' AS COURSE, COUNT(DISTINCT CASE WHEN  a.VisitedPages LIKE '%Payment Success%' THEN VISITORID END) AS ENROLLED, SUM(c.Price) AS TOTAL_REVENUE 
+FROM may_data a
+LEFT JOIN course_price c ON a.CourseID=c.Course
+WHERE a.VisitedPages LIKE '%Payment Success%' ;
+
+---------- JUNE EB1 AND FB1
+SELECT 'EB1' AS COURSE, COUNT(DISTINCT CASE WHEN  a.Status='Enrolled' THEN VISITORID END) AS ENROLLED, SUM(c.Price) AS TOTAL_REVENUE 
+FROM june_data a
+LEFT JOIN course_price c ON a.CourseID=c.Course
+WHERE a.Status='Enrolled' AND CampaignID='FB1' AND CourseID='EB1' ;
+
+------ JUNE EB1 AND CONTENT
+SELECT 'EB1' AS COURSE, COUNT(DISTINCT CASE WHEN  a.Status='Enrolled' THEN VISITORID END) AS ENROLLED, SUM(c.Price) AS TOTAL_REVENUE 
+FROM excel_data a
+LEFT JOIN course_price c ON a.CourseID=c.Course
+WHERE a.Status='Enrolled' AND CampaignID='Content' AND CourseID='EB1' ;
+
+------- JUNE EB1
+SELECT 'EB1' AS COURSE, COUNT(DISTINCT CASE WHEN  a.Status='Enrolled' THEN VISITORID END) AS ENROLLED, SUM(c.Price) AS TOTAL_REVENUE 
+FROM june_data a
+LEFT JOIN course_price c ON a.CourseID=c.Course
+WHERE a.Status='Enrolled' AND CourseID='EB1' ;
+
+------ JUNE SQLB1 AND YT2
+SELECT 'SQLB1' AS COURSE, COUNT(DISTINCT CASE WHEN  a.Status='Enrolled' THEN VISITORID END) AS ENROLLED, SUM(c.Price) AS TOTAL_REVENUE 
+FROM sql_data a
+LEFT JOIN course_price c ON a.CourseID=c.Course
+WHERE a.Status='Enrolled' AND CampaignID='YT2' AND CourseID='SQLB1' ;
+
+------ JUNE SQLB1 AND IG3
+SELECT 'SQLB1' AS COURSE, COUNT(DISTINCT CASE WHEN  a.Status='Enrolled' THEN VISITORID END) AS ENROLLED, SUM(c.Price) AS TOTAL_REVENUE 
+FROM sql_data a
+LEFT JOIN course_price c ON a.CourseID=c.Course
+WHERE a.Status='Enrolled' AND CampaignID='IG3' AND CourseID='SQLB1' ;
+
+------ JUNE SQLB1 AND CONTENT
+SELECT 'SQLB1' AS COURSE, COUNT(DISTINCT CASE WHEN  a.Status='Enrolled' THEN VISITORID END) AS ENROLLED, SUM(c.Price) AS TOTAL_REVENUE 
+FROM sql_data a
+LEFT JOIN course_price c ON a.CourseID=c.Course
+WHERE a.Status='Enrolled' AND CampaignID='CONTENT' AND CourseID='SQLB1' ;
+
+------ JUNE SQLB1
+SELECT 'SQLB1' AS COURSE, COUNT(DISTINCT CASE WHEN  a.Status='Enrolled' THEN VISITORID END) AS ENROLLED, SUM(c.Price) AS TOTAL_REVENUE 
+FROM sql_data a
+LEFT JOIN course_price c ON a.CourseID=c.Course
+WHERE a.Status='Enrolled';
+
+------- JUNE 
+SELECT 'SQLB1' AS COURSE, COUNT(DISTINCT CASE WHEN  a.Status='Enrolled' THEN VISITORID END) AS ENROLLED, SUM(c.Price) AS TOTAL_REVENUE 
+FROM june_data a
+LEFT JOIN course_price c ON a.CourseID=c.Course
+WHERE a.Status='Enrolled';
+
+---- APRIL, MAY, JUNE REVENUE
+SELECT 'APRIL' AS MONTH, COUNT(DISTINCT CASE WHEN  a.Status='Enrolled' THEN VISITORID END) AS ENROLLED,SUM(c.Price) AS TOTAL_REVENUE 
+FROM april_data a
+LEFT JOIN course_price c ON a.CourseID=c.Course
+WHERE a.Status='Enrolled'
+UNION ALL
+SELECT 'MAY' AS MONTH, COUNT(DISTINCT CASE WHEN  a.VisitedPages LIKE '%Payment Success%' THEN VISITORID END) AS ENROLLED, SUM(c.Price) AS TOTAL_REVENUE 
+FROM may_data a
+LEFT JOIN course_price c ON a.CourseID=c.Course
+WHERE a.VisitedPages LIKE '%Payment Success%' 
+UNION ALL
+SELECT 'JUNE' AS MONTH, COUNT(DISTINCT CASE WHEN  a.Status='Enrolled' THEN VISITORID END) AS ENROLLED, SUM(c.Price) AS TOTAL_REVENUE 
+FROM june_data a
+LEFT JOIN course_price c ON a.CourseID=c.Course
+WHERE a.Status='Enrolled';
+
+SELECT 'APRIL' AS MONTH, CourseID, COUNT(DISTINCT CASE WHEN  a.Status='Enrolled' THEN VISITORID END) AS ENROLLED,SUM(c.Price) AS TOTAL_REVENUE 
+FROM april_data a
+LEFT JOIN course_price c ON a.CourseID=c.Course
+WHERE a.Status='Enrolled'
+GROUP BY CourseID
+UNION ALL
+SELECT 'MAY' AS MONTH, CourseID, COUNT(DISTINCT CASE WHEN  a.VisitedPages LIKE '%Payment Success%' THEN VISITORID END) AS ENROLLED, SUM(c.Price) AS TOTAL_REVENUE 
+FROM may_data a
+LEFT JOIN course_price c ON a.CourseID=c.Course
+WHERE a.VisitedPages LIKE '%Payment Success%' 
+GROUP BY CourseID
+UNION ALL
+SELECT 'JUNE' AS MONTH, CourseID, COUNT(DISTINCT CASE WHEN  a.Status='Enrolled' THEN VISITORID END) AS ENROLLED, SUM(c.Price) AS TOTAL_REVENUE 
+FROM june_data a
+LEFT JOIN course_price c ON a.CourseID=c.Course
+WHERE a.Status='Enrolled'
+GROUP BY CourseID;
+
+-- ANALYSIS 6
+--------------------------------------------- A/B TESTING BEFOR 2023-07-15 ----------------------------------------
+SELECT * FROM campaign_metrics_july;
+
+CREATE TABLE BUDGET_JULY
+SELECT * 
+FROM campaign_metrics_july a
+LEFT JOIN campaigns b ON a.CampaignID=b.Campaign_ID
+WHERE (Campaign_ID='YT1' AND course='DAIB 1') OR (campaign_id='YT2' AND course='DAIB 1');
+
+SET SQL_SAFE_UPDATES=0;
+
+UPDATE BUDGET_JULY
+SET Variant='B'
+WHERE Variant='A or B';
+
+-- CTR
+SELECT CampaignID, Variant,
+SUM(clicks+conversions) AS VISITORS,
+SUM(impressions) AS IMPRESSIONS,
+ROUND(SUM(clicks+conversions)*100/SUM(impressions),2) AS CLICK_THROUGH_RATE
+FROM BUDGET_JULY
+WHERE VisitDate <='2023-07-15'
+GROUP BY CampaignID, Variant;
+
+-- CPC
+SELECT CampaignID, Variant,
+SUM(BUDGET) AS BUDGET, SUM(clicks + conversions) AS TOTAL_CLICKS,
+ROUND(SUM(BUDGET)/SUM(clicks + conversions),2) AS COST_PER_CLICK
+FROM BUDGET_JULY
+WHERE VisitDate <='2023-07-15'
+GROUP BY CampaignID, Variant;
+
+-- COST PER ACQUISITION
+SELECT CampaignID, Variant,
+SUM(BUDGET) AS BUDGET, SUM(conversions) AS TOTAL_CLICKS,
+ROUND(SUM(BUDGET)/SUM(conversions),2) AS COST_PER_CLICK
+FROM BUDGET_JULY
+WHERE VisitDate <='2023-07-15'
+GROUP BY CampaignID, Variant;
+       
+-- CONVERSION RATE
+SELECT CampaignID, Variant,
+SUM(CONVERSIONS) AS CONVERSION,
+SUM(clicks+conversions) AS VISITORS,
+ROUND(SUM(CONVERSIONS)*100/SUM(clicks+conversions),2) AS CONVERSION_RATE
+FROM BUDGET_JULY
+WHERE VisitDate <='2023-07-15'
+GROUP BY CampaignID, Variant;
+
+SELECT CampaignID, Variant,
+ROUND(SUM(clicks+conversions)*100/SUM(impressions),2) AS CLICK_THROUGH_RATE,
+ROUND(SUM(BUDGET)/SUM(clicks + conversions),2) AS COST_PER_CLICK,
+ROUND(SUM(BUDGET)/SUM(conversions),2) AS COST_PER_CLICK,
+ROUND(SUM(CONVERSIONS)*100/SUM(clicks+conversions),2) AS CONVERSION_RATE
+FROM BUDGET_JULY
+WHERE VisitDate <='2023-07-15'
+GROUP BY CampaignID, Variant;
+
+SELECT COUNT(*)
+FROM july_data_20230715 WHERE VisitedPages LIKE '%Payment Success%' AND Status='Visited';
+
+WITH AB AS (
+SELECT Variant, 'Home' AS PAGES, COUNT(DISTINCT VisitorID) AS VISITORS
+FROM july_data_20230715 
+WHERE VisitedPages LIKE '%Home%' 
+GROUP BY Variant
+UNION ALL
+SELECT Variant, 'Courses' AS PAGES, COUNT(DISTINCT VisitorID) AS VISITORS
+FROM july_data_20230715 
+WHERE VisitedPages LIKE '%Courses%' 
+GROUP BY Variant
+UNION ALL
+SELECT Variant, 'Course Details' AS PAGES, COUNT(DISTINCT VisitorID) AS VISITORS
+FROM july_data_20230715 
+WHERE VisitedPages LIKE '%Course Details%' 
+GROUP BY Variant
+UNION ALL
+SELECT Variant, 'Register Button' AS PAGES, COUNT(DISTINCT VisitorID) AS VISITORS
+FROM july_data_20230715 
+WHERE VisitedPages LIKE '%Register Button%' 
+GROUP BY Variant
+UNION ALL
+SELECT Variant, 'Payment Page' AS PAGES, COUNT(DISTINCT VisitorID) AS VISITORS
+FROM july_data_20230715 
+WHERE VisitedPages LIKE '%Payment Page%' 
+GROUP BY Variant
+UNION ALL
+SELECT Variant, 'Payment Success' AS PAGES, COUNT(DISTINCT VisitorID) AS VISITORS
+FROM july_data_20230715 
+WHERE VisitedPages LIKE '%Payment Success%' 
+GROUP BY Variant)
+SELECT PAGES,
+SUM(CASE WHEN Variant='A' THEN VISITORS END) AS VISITORS_VARIANT_A,
+SUM(CASE WHEN Variant='B' THEN VISITORS END) AS VISITORS_VARIANT_B
+FROM AB
+GROUP BY PAGES;
+
+WITH TIMESPENT AS(
+SELECT CampaignID, Variant, 'Home' AS PAGES, AVG(TimeSpent) AS AVG_TIMESPENT
+FROM july_data_20230715
+WHERE VisitedPages LIKE '%Home%' 
+GROUP BY  CampaignID, Variant
+UNION ALL
+SELECT  CampaignID, Variant, 'Courses' AS PAGES, AVG(TimeSpent) AS AVG_TIMESPENT
+FROM july_data_20230715
+WHERE VisitedPages LIKE '%Courses%' 
+GROUP BY CampaignID, Variant
+UNION ALL
+SELECT  CampaignID, Variant, 'Course Details' AS PAGES, AVG(TimeSpent) AS AVG_TIMESPENT
+FROM july_data_20230715
+WHERE VisitedPages LIKE '%Course Details%' 
+GROUP BY CampaignID, Variant
+UNION ALL
+SELECT CampaignID, Variant,  'Register Button' AS PAGES, AVG(TimeSpent) AS AVG_TIMESPENT
+FROM july_data_20230715
+WHERE VisitedPages LIKE '%Register Button%' AND CampaignID<>'Content'
+GROUP BY CampaignID, Variant
+UNION ALL
+SELECT CampaignID, Variant,  'Payment Page' AS PAGES, AVG(TimeSpent) AS AVG_TIMESPENT
+FROM july_data_20230715
+WHERE VisitedPages LIKE '%Payment Page%' 
+GROUP BY CampaignID, Variant
+UNION ALL
+SELECT CampaignID, Variant, 'Payment Success' AS PAGES, AVG(TimeSpent) AS AVG_TIMESPENT
+FROM july_data_20230715
+WHERE VisitedPages LIKE '%Payment Success%' 
+GROUP BY CampaignID, Variant)
+SELECT  PAGES,
+ROUND(AVG(CASE WHEN Variant='A' THEN AVG_TIMESPENT END),2) AS AVG_TIME_VARIANT_A,
+ROUND(AVG(CASE WHEN Variant='B' THEN AVG_TIMESPENT END),2) AS AVG_TIME_VARIANT_B
+FROM TIMESPENT
+GROUP BY  PAGES;
+
+-- CONVERSION RATE 
+SELECT Variant, CampaignID,
+COUNT(DISTINCT CASE WHEN Status='Enrolled' THEN VisitorID END ) AS CONVERSIONS,
+COUNT(DISTINCT VisitorID) AS VISITORS,
+ROUND(COUNT(DISTINCT CASE WHEN Status='Enrolled' THEN VisitorID END )*100/COUNT(DISTINCT VisitorID),2) AS CONVERSION_RATE
+FROM july_data_20230715
+GROUP BY Variant, CampaignID;
+
+WITH AB AS (
+SELECT Variant, 'Home' AS PAGES, COUNT(DISTINCT VisitorID) AS VISITORS
+FROM july_data_20230731 
+WHERE VisitedPages LIKE '%Home%' 
+GROUP BY Variant
+UNION ALL
+SELECT Variant, 'Courses' AS PAGES, COUNT(DISTINCT VisitorID) AS VISITORS
+FROM july_data_20230731 
+WHERE VisitedPages LIKE '%Courses%' 
+GROUP BY Variant
+UNION ALL
+SELECT Variant, 'Course Details' AS PAGES, COUNT(DISTINCT VisitorID) AS VISITORS
+FROM july_data_20230731 
+WHERE VisitedPages LIKE '%Course Details%' 
+GROUP BY Variant
+UNION ALL
+SELECT Variant, 'Register Button' AS PAGES, COUNT(DISTINCT VisitorID) AS VISITORS
+FROM july_data_20230731 
+WHERE VisitedPages LIKE '%Register Button%' 
+GROUP BY Variant
+UNION ALL
+SELECT Variant, 'Payment Page' AS PAGES, COUNT(DISTINCT VisitorID) AS VISITORS
+FROM july_data_20230731 
+WHERE VisitedPages LIKE '%Payment Page%' 
+GROUP BY Variant
+UNION ALL
+SELECT Variant, 'Payment Success' AS PAGES, COUNT(DISTINCT VisitorID) AS VISITORS
+FROM july_data_20230731 
+WHERE VisitedPages LIKE '%Payment Success%' 
+GROUP BY Variant)
+SELECT PAGES,
+SUM(CASE WHEN Variant='B' THEN VISITORS END) AS VISITORS_VARIANT_B
+FROM AB
+GROUP BY PAGES;
+
+WITH TIMESPENT AS(
+SELECT CampaignID, Variant, 'Home' AS PAGES, AVG(TimeSpent) AS AVG_TIMESPENT
+FROM july_data_20230731
+WHERE VisitedPages LIKE '%Home%' 
+GROUP BY  CampaignID, Variant
+UNION ALL
+SELECT  CampaignID, Variant, 'Courses' AS PAGES, AVG(TimeSpent) AS AVG_TIMESPENT
+FROM july_data_20230731
+WHERE VisitedPages LIKE '%Courses%' 
+GROUP BY CampaignID, Variant
+UNION ALL
+SELECT  CampaignID, Variant, 'Course Details' AS PAGES, AVG(TimeSpent) AS AVG_TIMESPENT
+FROM july_data_20230731
+WHERE VisitedPages LIKE '%Course Details%' 
+GROUP BY CampaignID, Variant
+UNION ALL
+SELECT CampaignID, Variant,  'Register Button' AS PAGES, AVG(TimeSpent) AS AVG_TIMESPENT
+FROM july_data_20230731
+WHERE VisitedPages LIKE '%Register Button%' AND CampaignID<>'Content'
+GROUP BY CampaignID, Variant
+UNION ALL
+SELECT CampaignID, Variant,  'Payment Page' AS PAGES, AVG(TimeSpent) AS AVG_TIMESPENT
+FROM july_data_20230731
+WHERE VisitedPages LIKE '%Payment Page%' 
+GROUP BY CampaignID, Variant
+UNION ALL
+SELECT CampaignID, Variant, 'Payment Success' AS PAGES, AVG(TimeSpent) AS AVG_TIMESPENT
+FROM july_data_20230731
+WHERE VisitedPages LIKE '%Payment Success%' 
+GROUP BY CampaignID, Variant)
+SELECT  PAGES,
+ROUND(AVG(CASE WHEN Variant='B' THEN AVG_TIMESPENT END),2) AS AVG_TIME_VARIANT_B
+FROM TIMESPENT
+GROUP BY  PAGES;
+
+-- CONVERSION RATE 
+SELECT CampaignID, Variant,
+COUNT(DISTINCT CASE WHEN Status='Enrolled' THEN VisitorID END ) AS CONVERSIONS,
+COUNT(DISTINCT VisitorID) AS VISITORS,
+ROUND(COUNT(DISTINCT CASE WHEN Status='Enrolled' THEN VisitorID END )*100/COUNT(DISTINCT VisitorID),2) AS CONVERSION_RATE
+FROM july_data_20230731
+GROUP BY CampaignID, Variant;
+
+
